@@ -10,7 +10,7 @@ The presentation is intended for conversations with collaborators, researchers, 
 2. Select **Enter the network** to begin, or scroll to a chapter.
 3. Use **Engineering lens** in the navigation bar for technical notes.
 
-The presentation includes its CSS, JavaScript, and visualization library in `index.html`. No build step is required. You can open the file in a desktop browser or use the published HTTPS site. Some mobile file previewers do not execute JavaScript.
+The presentation uses locally bundled CSS and JavaScript in `assets/`. No build step or external service is required. Use the published HTTPS site or serve the repository locally. The `assets/` directory must stay alongside `index.html` for the visualizations to work.
 
 For local development, start a server from the repository directory:
 
@@ -43,6 +43,14 @@ All people, communities, votes, timelines, points, and feasibility positions sho
 ```text
 rhizome-living-network/
   index.html
+  assets/
+    css/
+      rhizome.css
+    js/
+      d3-compat.js
+      rhizome.js
+    vendor/
+      d3-3.5.6.min.js
   README.md
   SHA256SUMS.txt
   docs/
