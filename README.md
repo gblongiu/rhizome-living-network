@@ -38,6 +38,23 @@ Open `http://localhost:8000` in a browser. Modern browsers treat localhost as a 
 
 All people, communities, votes, timelines, points, and feasibility positions shown in the diagrams are **synthetic**. They illustrate behavior and tradeoffs rather than reporting measured research findings.
 
+
+## Security contract review
+
+The `proposal/security-contracts-v1` branch retains the original thirteen chapters and their network visualizations. It adds a proposed security contract to the existing **Engineering lens** for each chapter. Chapter 04 also includes a deterministic authorization laboratory with eleven synthetic request scenarios, decision traces and recipient-scoped outcomes.
+
+Use **Review the proposed protocol** on the opening screen, then scroll to see the contract change with each chapter. The existing interactive federation graph remains in Chapter 02. Use Chapter 04 to test the distinctions between operator retrieval, approved Local sharing, Private inference, derived content, and stale permission state.
+
+The technical material is organized in three small public documents:
+
+- [`docs/SECURITY_PROPOSAL.md`](docs/SECURITY_PROPOSAL.md): vocabulary, draft security requirements, key recovery and migration conditions.
+- [`docs/ACCEPTANCE_PLAN.md`](docs/ACCEPTANCE_PLAN.md): worked-case tests and independent-node adversarial test plan.
+- [`docs/REVIEW_STATUS.md`](docs/REVIEW_STATUS.md): evidence boundaries and decisions for review.
+
+Run the reproducible example-policy assertions with `node tools/test_proposal.js`. These assertions test only the local demonstration logic. No current FourThought node has been inspected or modified by this branch.
+
+**All proposed contracts remain proposals.** The browser policy examples, federation links, private-computation graphics and recovery descriptions do not implement a production access-control or cryptographic system.
+
 ## Repository contents
 
 ```text
@@ -46,9 +63,14 @@ rhizome-living-network/
   assets/
     css/
       rhizome.css
+      rhizome-mobile.css
+      protocol-review.css
     js/
       d3-compat.js
       rhizome.js
+      rhizome-mobile.js
+      proposal-policy.js
+      protocol-review.js
     vendor/
       d3-3.5.6.min.js
   README.md
@@ -59,14 +81,21 @@ rhizome-living-network/
     SECURITY_BOUNDARIES.md
     THIRD_PARTY_NOTICES.md
     QA_REPORT.md
+    SECURITY_PROPOSAL.md
+    ACCEPTANCE_PLAN.md
+    REVIEW_STATUS.md
   licenses/
     D3_BSD_3_CLAUSE.txt
   previews/
+    proposal_contract_desktop.png
+    proposal_authorization_desktop.png
+    proposal_authorization_mobile.png
     desktop.png
     relationship_consent.png
     mobile.png
   tools/
     verify_package.py
+    test_proposal.js
 ```
 
 `index.html` serves the published website. The remaining files document the architecture, interactions, security boundaries, testing, and integrity checks.

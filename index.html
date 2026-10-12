@@ -7,6 +7,7 @@
 <meta name="description" content="An immersive, research-informed exploration of a security-first knowledge commons: sovereign identities, federation, private computation, and historical perspective.">
 <link rel="stylesheet" href="assets/css/rhizome.css">
 <link rel="stylesheet" href="assets/css/rhizome-mobile.css">
+<link rel="stylesheet" href="assets/css/protocol-review.css">
 </head>
 <body>
 <div id="scrollProgress" class="scroll-progress" aria-hidden="true"></div>
@@ -18,14 +19,24 @@
  </div>
  <button type="button" class="lens-toggle" id="lensButton" aria-pressed="false" aria-label="Toggle engineering explanation"><span class="lens-indicator"></span><span class="lens-text">Engineering lens</span></button>
 </nav>
-<div id="lensPanel" class="lens-panel" role="region" aria-label="Engineering explanation" hidden><div class="lens-head"><div class="eyebrow">INSIDE THE PROTOCOL</div><button id="closeLens" class="icon-close" aria-label="Close engineering lens">✕</button></div><p id="lensTitle" class="lens-title"></p><p id="lensBody"></p><div id="lensSpec" class="lens-spec"></div></div>
+<div id="lensPanel" class="lens-panel" role="region" aria-label="Chapter security contract" tabindex="-1" hidden>
+ <div class="lens-head"><div class="eyebrow">INSIDE THE PROTOCOL</div><button id="closeLens" class="icon-close" aria-label="Close engineering lens">✕</button></div>
+ <div class="contract-identity"><span id="contractChapter"></span><span id="contractStatus" class="contract-status"></span></div>
+ <h3 id="contractTitle" class="contract-title"></h3>
+ <div class="contract-line"><span>PROPOSED RULE</span><p id="contractRule"></p></div>
+ <div class="contract-line"><span>ENFORCEMENT PATH</span><p id="contractEnforcement"></p></div>
+ <div class="contract-line"><span>FAILURE BEHAVIOR</span><p id="contractFailure"></p></div>
+ <div class="contract-line"><span>ACCEPTANCE CHECK</span><p id="contractTest"></p></div>
+ <a id="contractReadMore" class="contract-read-more" href="docs/SECURITY_PROPOSAL.md">Full proposed specification <span aria-hidden="true">↗</span></a>
+ <details class="concept-context"><summary>Chapter architecture context</summary><p id="lensTitle" class="lens-title"></p><p id="lensBody"></p><div id="lensSpec" class="lens-spec"></div></details>
+ </div>
 <main>
 <section id="opening" class="hero chapter" data-chapter="00" data-lens="Architectural thesis" data-tech="Open implementation is compatible with closed-by-default data. Design separate authorities for software, node operation, personal keys, community membership, record disclosure, and inference. Nothing in this interactive demo constitutes a deployed security system." data-spec="Security goals · confidentiality, integrity, availability, autonomy, unlinkability">
  <canvas id="heroCanvas" aria-hidden="true"></canvas><div class="hero-vignette" aria-hidden="true"></div>
  <div class="hero-core"><div class="overline"><span class="live-seed"></span> AN OPEN NETWORK THAT DOESN'T OWN YOU <span class="hero-edition">/ RESEARCH VISION · 2026</span></div>
   <h1>OPEN<br><em>BY DESIGN.</em><br>PRIVATE<br><strong>BY DEFAULT.</strong></h1>
   <p class="hero-deck">A living network of independent communities. A collective memory that can change its mind. A security model that doesn't need to trust its hosts.</p>
-  <div class="hero-actions"><a class="primary-cta" href="#federation">Enter the network <span>↗</span></a><a href="#principles" class="quiet-cta">Read the principles <span>↓</span></a></div>
+  <div class="hero-actions"><a class="primary-cta" href="#federation">Enter the network <span>↗</span></a><a href="#principles" class="quiet-cta">Read the principles <span>↓</span></a><button type="button" class="quiet-cta proposal-launch" id="openProposal">Review the proposed protocol <span>↗</span></button></div>
  </div>
  <div class="hero-side-label" aria-hidden="true">01 / a more deliberate internet</div>
  <div class="hero-bottom"><div class="hero-axiom"><span class="axiom-index">I.</span> Anyone can build a home here.<br><span class="axiom-index">II.</span> No one inherits the keys.</div><div class="hero-legend"><span><b class="dot green"></b> consent</span><span><b class="dot pink"></b> people</span><span><b class="dot blue"></b> autonomy</span><span><b class="dot purple"></b> inference</span></div><a class="scroll-cue" href="#principles">SCROLL TO EXPLORE <span>↓</span></a></div>
@@ -53,6 +64,28 @@
  <div class="section-frame"><div class="chapter-line"><span>04 / DATA SOVEREIGNTY</span><span>EXPERIMENT 03 · REAL LOCAL ENCRYPTION</span></div><div class="section-intro wide"><p class="eyebrow blue-ink">PRIVATE MEANS PRIVATE</p><h2>Make the host useful.<br><i>Not all-knowing.</i></h2><p class="lede">Store a thought on someone else's hardware without handing them the key. A permission to communicate is not a permission to read, search, infer, or republish.</p></div>
  <div class="stage stage-vault"><div class="vault-grid"><div class="vault-left"><div class="vault-cap"><span class="key-symbol">⌘</span><div><span class="tool-kicker">YOUR KNOWLEDGE VAULT</span><strong>Encrypt a sample thought locally</strong></div></div><label for="vaultInput" class="sr-only">Sample private thought</label><textarea id="vaultInput" spellcheck="false" rows="3">A thought can be useful to a community without becoming public property.</textarea><div class="vault-actions"><button class="action-button bright" id="encryptButton">Seal locally <span>↗</span></button><button class="action-button ghost" id="decryptButton" disabled>Unlock locally</button><button class="reset-button" id="clearVault" title="Reset encryption demonstration" aria-label="Reset encryption demonstration">↻</button></div><small class="vault-explainer" id="vaultExplain">Real browser cryptography, executed on your device. This example uses a temporary key and does not upload data.</small></div><div class="vault-right"><span class="tool-kicker">WHAT THE HOST WOULD STORE</span><div class="cipher-label"><span id="vaultState">NOT YET ENCRYPTED</span><span id="cipherBytes">0 bytes</span></div><pre id="cipherPreview" class="cipher-preview">Click “Seal locally” to see ciphertext replace the readable record.</pre><div class="safe-strip"><span class="status-led"></span><span>No data is transmitted by this demonstration</span></div></div></div></div>
  <div class="permission-row"><div><span>01</span><b>Connection</b><small>May communicate</small></div><div><span>02</span><b>Disclosure</b><small>May receive selected information</small></div><div><span>03</span><b>Inference</b><small>May process only authorized sources</small></div><div><span>04</span><b>Publication</b><small>May redistribute an approved result</small></div></div>
+ <div class="policy-lab" aria-labelledby="policyHeading">
+   <div class="policy-lab-top"><div><span class="tool-kicker">AUTHORIZATION / WORKED CASES</span><h3 id="policyHeading">Who may receive the result?</h3><p>Choose a request. The proposed policy evaluates the intended recipient separately from the service that retrieves the record.</p></div><span class="policy-simulation">DETERMINISTIC POLICY MODEL · NOT DEPLOYED</span></div>
+   <div class="policy-layout"><div class="policy-case-list" id="policyCases" role="group" aria-label="Authorization cases"></div>
+    <div class="policy-inspector" aria-live="polite"><div class="policy-inspector-top"><span class="tool-kicker" id="policyCategory">PERSONAL CUSTODY</span><span id="policyIndex" class="policy-index">01 / 11</span></div>
+     <h4 id="policyCaseTitle">Owner reads a Private Thought</h4><div class="policy-decision-line"><span class="policy-result" id="policyDecision" data-decision="ALLOW">ALLOW</span><span id="policyReason">All specified policy conditions are satisfied.</span></div>
+     <div class="policy-request"><div><small>ACTOR</small><strong id="policyActor">owner</strong></div><div><small>RECIPIENT</small><strong id="policyRecipient">owner</strong></div><div><small>ACTION</small><strong id="policyAction">read</strong></div></div>
+     <div class="policy-sources"><small>SOURCE SCOPE</small><code id="policyScope">thought-private</code></div>
+     <div class="policy-trace-heading">DECISION TRACE</div><ol id="policyTrace" class="policy-trace"></ol>
+     <p class="policy-meaning" id="policyMeaning"></p>
+    </div>
+   </div><div class="policy-lab-foot">These synthetic cases exercise an illustrative client-side policy function. They do not establish how current FourThought nodes enforce permissions, store keys or serve models.</div>
+  </div>
+  <div class="recovery-design" aria-labelledby="recoveryHeading">
+   <div class="recovery-intro"><span class="tool-kicker">KEY CUSTODY / RECOVERY</span><h3 id="recoveryHeading">What survives a lost device?</h3><p>Owner-sealed encryption needs a recovery choice before existing histories are migrated. The node operator does not receive a universal recovery key.</p></div>
+   <div class="recovery-choice" role="group" aria-label="Recovery material available">
+    <button type="button" class="recovery-option" data-recovery="device" aria-pressed="true">Another enrolled device</button>
+    <button type="button" class="recovery-option" data-recovery="kit" aria-pressed="false">Owner-held recovery kit</button>
+    <button type="button" class="recovery-option" data-recovery="none" aria-pressed="false">No remaining recovery material</button>
+   </div>
+   <div class="recovery-outcome"><div><span class="recovery-indicator" id="recoveryIndicator" data-outcome="possible">RECOVERY PATH AVAILABLE</span><h4 id="recoveryTitle">Restore through an enrolled device</h4><p id="recoveryDescription">A separately enrolled, accessible device may authorize a replacement device to recover the protected history under an approved enrollment procedure.</p></div><div class="recovery-owner"><span>KEY AUTHORITY</span><strong>THE OWNER</strong><small>Not the storage host. Local Iris access remains a separate, time-limited capability.</small></div></div>
+   <div class="recovery-foot">Design scenarios only. Real recovery requires authenticated key enrollment, tested backups, a reversible migration and a successful device-loss drill.</div>
+  </div>
  </div>
 </section>
 
@@ -117,4 +150,6 @@
 <script src="assets/js/d3-compat.js"></script>
 <script src="assets/js/rhizome.js"></script>
 <script src="assets/js/rhizome-mobile.js"></script>
+<script src="assets/js/proposal-policy.js"></script>
+<script src="assets/js/protocol-review.js"></script>
 </body></html>

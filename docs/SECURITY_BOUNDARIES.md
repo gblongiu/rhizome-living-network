@@ -36,3 +36,9 @@ Do not enter actual secrets into demonstrations. The visualization should not be
 ## What to validate before building
 
 Specify adversaries, privacy goals, data classifications, key holders, trust domains, compromise recovery rules, revocation freshness, governance quorums, and retention semantics. Then write negative conformance tests against actual independent node implementations. A visual demonstration is a design aid, not a substitute for cryptographic enforcement.
+
+## Contract review additions
+
+The engineering lens now displays a proposed rule, enforcement path, failure behavior and acceptance check for each of thirteen chapters. Chapter 04 also runs an illustrative JavaScript policy evaluator against eleven synthetic examples. Neither component executes production node authorization, validates real identity credentials, provides durable keys, proves safe federation or verifies recovery.
+
+The repository has not independently established the deployed behavior of Private, Local or Global records. The stronger owner-sealed model and selected local Iris permissions are design objectives that require acceptance tests against an actual implementation before any migration.
