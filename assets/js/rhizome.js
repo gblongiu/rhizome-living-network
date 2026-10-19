@@ -17,12 +17,101 @@ $('lensButton').addEventListener('click',()=>toggleLens());$('closeLens').addEve
 const chapters=qa('.chapter');const chapterObs=new IntersectionObserver(entries=>{let visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);if(visible.length){currentChapter=visible[0].target.id;const target=visible[0].target;qa('.nav-items a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+target.id));if(lensOn)updateLens()}},{threshold:[.1,.25,.45,.6],rootMargin:'-15% 0px -27% 0px'});chapters.forEach(s=>chapterObs.observe(s));
 let rafScroll=0;window.addEventListener('scroll',()=>{if(rafScroll)return;rafScroll=requestAnimationFrame(()=>{$('scrollProgress').style.width=(100*window.scrollY/Math.max(1,document.body.scrollHeight-innerHeight))+'%';rafScroll=0})},{passive:true});window.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!reduced){$('cursorHalo').style.transform=`translate(${e.clientX-210}px,${e.clientY-210}px)`;}},{passive:true});
 // HERO · ambient phase-space network
-(function(){const canvas=$('heroCanvas'),ctx=canvas.getContext('2d');let W=0,H=0,p=[],phase=0,pointer={x:.68,y:.47},seen=true;const rand=(seed=>()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296})(1734091);
-function size(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,1.7);W=r.width;H=r.height;canvas.width=Math.max(1,Math.round(W*d));canvas.height=Math.max(1,Math.round(H*d));ctx.setTransform(d,0,0,d,0,0);p=Array.from({length:95},(_,i)=>({ang:rand()*Math.PI*2,rad:(.17+Math.pow(rand(),.55)*.81),v:(.12+rand()*.32)*(rand()>.5?1:-1),size:rand()*2.3+.8,seed:rand()*4,group:i%5}))}size();addEventListener('resize',()=>{clearTimeout(size.t);size.t=setTimeout(size,130)});const obs=new IntersectionObserver(x=>seen=x[0].isIntersecting,{threshold:0});obs.observe(canvas);window.addEventListener('pointermove',e=>{pointer={x:e.clientX/innerWidth,y:e.clientY/innerHeight}},{passive:true});
-function frame(ms){requestAnimationFrame(frame);if(!seen||document.hidden)return;const t=ms/1000;ctx.clearRect(0,0,W,H);const cx=W*(W<660?.75:.73)+(pointer.x-.5)*22,cy=H*.51+(pointer.y-.5)*15;let radi=Math.min(W*.35,H*.43);let pal=['#91a6ff','#FF69B4','#4CAF50','#7E2F94','#FFA500'];ctx.save();ctx.globalCompositeOperation='screen';const haze=ctx.createRadialGradient(cx,cy,18,cx,cy,radi*1.95);haze.addColorStop(0,'rgba(94,72,224,.17)');haze.addColorStop(.55,'rgba(128,44,143,.115)');haze.addColorStop(1,'rgba(6,10,29,0)');ctx.fillStyle=haze;ctx.beginPath();ctx.arc(cx,cy,radi*1.95,0,2*Math.PI);ctx.fill();for(let ri=1;ri<=4;ri++){ctx.beginPath();ctx.ellipse(cx,cy,radi*(.32+ri*.18),radi*(.25+ri*.15),-.24,0,2*Math.PI);ctx.strokeStyle=`rgba(156,157,246,${.045+ri*.018})`;ctx.lineWidth=ri===4?1.2:.8;ctx.stroke()}
+(function(){const canvas=$('heroCanvas'),ctx=canvas.getContext('2d');let W=0,H=0,p=[],phase=0,pointer={x:.68,y:.47},seen=true;let rafId=0;function schedule(){if(!rafId&&seen&&!document.hidden)rafId=requestAnimationFrame(frame)}function stop(){if(rafId){cancelAnimationFrame(rafId);rafId=0}}const rand=(seed=>()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296})(1734091);
+/* Cached node glows for Chrome's canvas renderer. */
+const nodeColors=[
+  '#91a6ff','#FF69B4','#4CAF50','#7E2F94','#FFA500'
+];
+
+const nodeTileCss=80;
+const nodeColumns=12;
+
+let nodeAtlas=null;
+let nodeTilePx=0;
+
+const useNodeAtlas=
+  /\bChrome\//.test(navigator.userAgent) &&
+  !/\b(?:Edg|OPR)\//.test(navigator.userAgent) &&
+  new URLSearchParams(location.search)
+    .get('heroRenderer')!=='legacy';
+
+canvas.dataset.rhizomeRenderer=
+  useNodeAtlas?'sprite-atlas':'original';
+
+function rebuildNodeAtlas(d){
+  if(!useNodeAtlas)return;
+
+  const px=Math.ceil(nodeTileCss*d);
+  const atlas=document.createElement('canvas');
+
+  atlas.width=px*nodeColumns;
+  atlas.height=px*Math.ceil(p.length/nodeColumns);
+
+  const ac=atlas.getContext('2d');
+
+  if(!ac)return;
+
+  ac.setTransform(
+    px/nodeTileCss,0,0,px/nodeTileCss,0,0
+  );
+
+  p.forEach((n,i)=>{
+    ac.save();
+
+    ac.fillStyle=nodeColors[n.group];
+    ac.shadowColor=nodeColors[n.group];
+    ac.shadowBlur=14;
+
+    ac.beginPath();
+
+    ac.arc(
+      (i%nodeColumns+.5)*nodeTileCss,
+      (Math.floor(i/nodeColumns)+.5)*nodeTileCss,
+      n.size,
+      0,
+      2*Math.PI
+    );
+
+    ac.fill();
+    ac.restore();
+  });
+
+  nodeAtlas=atlas;
+  nodeTilePx=px;
+}
+function size(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,1.7);W=r.width;H=r.height;canvas.width=Math.max(1,Math.round(W*d));canvas.height=Math.max(1,Math.round(H*d));ctx.setTransform(d,0,0,d,0,0);p=Array.from({length:95},(_,i)=>({ang:rand()*Math.PI*2,rad:(.17+Math.pow(rand(),.55)*.81),v:(.12+rand()*.32)*(rand()>.5?1:-1),size:rand()*2.3+.8,seed:rand()*4,group:i%5}));rebuildNodeAtlas(d)}size();addEventListener('resize',()=>{clearTimeout(size.t);size.t=setTimeout(size,130)});const obs=new IntersectionObserver(([entry])=>{seen=entry.isIntersecting;if(seen)schedule();else stop()},{threshold:0});obs.observe(canvas);document.addEventListener('visibilitychange',()=>document.hidden?stop():schedule());window.addEventListener('pointermove',e=>{pointer={x:e.clientX/innerWidth,y:e.clientY/innerHeight}},{passive:true});
+function frame(ms){rafId=0;if(!seen||document.hidden)return;const t=ms/1000;ctx.clearRect(0,0,W,H);const cx=W*(W<660?.75:.73)+(pointer.x-.5)*22,cy=H*.51+(pointer.y-.5)*15;let radi=Math.min(W*.35,H*.43);let pal=nodeColors;ctx.save();ctx.globalCompositeOperation='screen';const haze=ctx.createRadialGradient(cx,cy,18,cx,cy,radi*1.95);haze.addColorStop(0,'rgba(94,72,224,.17)');haze.addColorStop(.55,'rgba(128,44,143,.115)');haze.addColorStop(1,'rgba(6,10,29,0)');ctx.fillStyle=haze;ctx.beginPath();ctx.arc(cx,cy,radi*1.95,0,2*Math.PI);ctx.fill();for(let ri=1;ri<=4;ri++){ctx.beginPath();ctx.ellipse(cx,cy,radi*(.32+ri*.18),radi*(.25+ri*.15),-.24,0,2*Math.PI);ctx.strokeStyle=`rgba(156,157,246,${.045+ri*.018})`;ctx.lineWidth=ri===4?1.2:.8;ctx.stroke()}
 let pts=p.map(n=>{const a=n.ang+(reduced?0:t*.045*n.v);let radius=n.rad*radi*(1+.028*Math.sin(t*.42+n.seed));return{x:cx+Math.cos(a)*radius*1.15,y:cy+Math.sin(a)*radius*.9,r:n.size,group:n.group,seed:n.seed}});
 for(let i=0;i<pts.length;i++){const a=pts[i];let nearest=0;for(let j=i+1;j<pts.length;j++){const b=pts[j];const dist=Math.hypot(a.x-b.x,a.y-b.y);if(dist<radi*.29){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(139,161,229,${Math.max(0,.20-dist/radi*.67)})`;ctx.lineWidth=.7;ctx.stroke();if(!reduced&&i%7===0&&nearest++===0){let f=(t*.16+a.seed)%1;ctx.fillStyle='rgba(230,218,255,.5)';ctx.beginPath();ctx.arc(a.x+(b.x-a.x)*f,a.y+(b.y-a.y)*f,1.5,0,2*Math.PI);ctx.fill()}}}}
-pts.forEach(n=>{const col=pal[n.group];ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=14;ctx.globalAlpha=.5+.35*Math.sin(t*.6+n.seed)**2;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0});ctx.restore();}requestAnimationFrame(frame)})();
+pts.forEach((n,i)=>{
+  ctx.globalAlpha=.5+.35*Math.sin(t*.6+n.seed)**2;
+
+  if(useNodeAtlas&&nodeAtlas){
+    ctx.drawImage(
+      nodeAtlas,
+      (i%nodeColumns)*nodeTilePx,
+      Math.floor(i/nodeColumns)*nodeTilePx,
+      nodeTilePx,
+      nodeTilePx,
+      n.x-nodeTileCss/2,
+      n.y-nodeTileCss/2,
+      nodeTileCss,
+      nodeTileCss
+    );
+  }else{
+    const col=pal[n.group];
+
+    ctx.fillStyle=col;
+    ctx.shadowColor=col;
+    ctx.shadowBlur=14;
+
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+  }
+});ctx.restore();schedule();}schedule()})();
 // FEDERATION · communities have immutable anchors; satellites float but cannot carry trust transitively
 const fedData={separate:{title:'Independent by default',desc:'Every community is free to operate the software. No connection or browse permission exists until all relevant participants approve one.',status:'No automatic permissions',n:'01 / 04',rules:[['✓','Independent operation'],['✓','Owner-controlled vaults'],['×','Automatic peer discovery rights']]},introduced:{title:'A conversation is not a grant',desc:'Community A invites Community B to discuss collaboration. A proposal is visible, but the connection is not yet active and no private information moves.',status:'Proposal requires two approvals',n:'02 / 04',rules:[['✓','Transparent invitation'],['×','No signed bilateral grant yet'],['×','No inheritable permissions']]},approved:{title:'Federation, with boundaries',desc:'A and B authorize a defined shared space. B also works with C. This does not create an A–C connection or unlock anyone’s private vault.',status:'Scoped federation · no transitive trust',n:'03 / 04',rules:[['✓','Mutually signed grants'],['✓','Explicit resource scopes'],['×','B cannot authorize C for A']]},breach:{title:'Contain a compromised neighbor',desc:'B’s host is compromised. A suspends its connection pending review. Owners retain their decryption keys, while B–C is a separate relationship.',status:'Fail closed · protected grants suspended',n:'04 / 04',rules:[['✓','Owner-sealed records remain encrypted'],['×','A–B privileged operations blocked'],['✓','No automatic cascade into A']]}};
 let federationMode='separate';const communityAnchors=[{x:176,y:167,id:'A',name:'RESEARCH',color:c.brightBlue},{x:564,y:146,id:'B',name:'MUTUAL AID',color:c.softGreen},{x:390,y:382,id:'C',name:'COOPERATIVE',color:c.softPink},{x:765,y:373,id:'D',name:'ARCHIVE',color:c.softOrange}];
